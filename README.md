@@ -82,9 +82,16 @@ Install on blank SDCard (assuming SDCard in on /dev/mmcblk0):
 # sync
 ```
 
-For eMMC, for a running Linux on the board, you can install on the eMMC by running :
+For eMMC, for a running Linux on the board:
+
+Clean the first block of the eMMC where u-boot will be copied:
 ```
-$ dd if=u-boot.bin of=/dev/mmcblk1 bs=512 seek=1
+$ dd if=/dev/zero of=/dev/mmcblk0 bs=512 count=1
+```
+
+Then copy u-boot to the eMMC (assuming the eMMC device is mmcblk0) by running :
+```
+$ dd if=u-boot.bin of=/dev/mmcblk0 bs=512 seek=1
 ```
 
  - Amlogic Vendor U-boot for LibreTech CC
