@@ -1,14 +1,12 @@
-LibreTech U-boot Tree
-=====================
+# LibreTech U-boot Tree
 
-Board support
+## Board support
 -------------
  - LibreTech CC/ : branch `libretech-cc` for Amlogic U-Boot, branch `u-boot/v2017.11/libretech-cc` for v2017.11 based U-Boot
 
-Howto Build
+## Mainline U-boot for LibreTech CC
 -----------
- 
- - Mainline U-boot for LibreTech CC
+### How to build and install
 
 Big FAT Warning :
 Support for Mainline U-boot will require Linux 4.16, or the Linux 4.14 with patches you can find at : https://github.com/libre-computer-project/libretech-linux
@@ -74,7 +72,9 @@ fip/
 └── ...
 ```
 
-Install on blank SDCard (assuming SDCard in on /dev/mmcblk0):
+### Install on SD Card
+
+To install on blank SDCard (assuming SDCard in on /dev/mmcblk0):
 ```
 # sudo mkfs.vfat /dev/mmcblk0p1
 # sudo dd if=fip/u-boot.bin.sd.bin of=/dev/mmcblk0 conv=fsync,notrunc bs=1 count=444
@@ -82,7 +82,9 @@ Install on blank SDCard (assuming SDCard in on /dev/mmcblk0):
 # sync
 ```
 
-For eMMC, for a running Linux on the board:
+### Install on eMMC
+
+To install on an eMMC you will first need to boot the board with an eMMC attached to it. From the running Linux on the board follow these steps:
 
 Clean the first block of the eMMC where u-boot will be copied:
 ```
@@ -94,7 +96,48 @@ Then copy u-boot to the eMMC (assuming the eMMC device is mmcblk0) by running :
 $ dd if=u-boot.bin of=/dev/mmcblk0 bs=512 seek=1
 ```
 
- - Amlogic Vendor U-boot for LibreTech CC
+#### [Optionnal extra step] configure u-boot to load and save environment on eMMC
+i.e. to save the u-boot environment on the eMMC and completely get rid of the SD card.
+
+- Apply this patch to mailine u-boot (previously cloned repo) `libretech-cc-u-boot`:
+```
+diff --git a/configs/libretech-cc_defconfig b/configs/libretech-cc_defconfig
+index 7eb4e38f5001..3414191e873c 100644
+--- a/configs/libretech-cc_defconfig
++++ b/configs/libretech-cc_defconfig
+@@ -8,7 +8,7 @@ CONFIG_DEBUG_UART=y
+ # CONFIG_ENV_IS_NOWHERE is not set
+ CONFIG_ENV_IS_IN_FAT=y
+ CONFIG_ENV_FAT_INTERFACE="mmc"
+-CONFIG_ENV_FAT_DEVICE_AND_PART="0:auto"
++CONFIG_ENV_FAT_DEVICE_AND_PART="1:auto"
+ CONFIG_ENV_FAT_FILE="uboot.env"
+ CONFIG_FAT_WRITE=y
+ # CONFIG_DISPLAY_CPUINFO is not set
+```
+
+This will tell u-boot to save and load the environment from the eMMC (device 1) and not the SD card (device 0).
+
+- Follow the previous steps to `Generate the final image`.
+- Re-flash u-boot on the eMMC following `Install on eMMC`.
+
+If not already done, create a FAT partition on the eMMC:
+```
+# fdisk /dev/mmcblk0
+n
+p
+1
+100
+400
+w
+# mkfs.vfat /dev/mmcblk0p1
+```
+
+You can reboot and saveenv/loadenv from eMMC.
+
+## Amlogic Vendor U-boot for LibreTech CC
+-----------
+### How to build and install
 
 Checkout source and prepare environment:
 
